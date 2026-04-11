@@ -1,4 +1,8 @@
 # Détecteur Automatique de Fichiers Sensibles
+![Cybersecurity](https://img.shields.io/badge/Cybersecurity-GRC%20%7C%20RGPD-red)
+![Tool](https://img.shields.io/badge/Tool-Bash%20%7C%20Python-blue)
+![Level](https://img.shields.io/badge/Level-Intermediate-orange)
+![Status](https://img.shields.io/badge/Status-Complete-green)
 
 > **Aperçu visuel de l'audit en cours :**
 ![Capture d'écran du script en action](Screenshot_detecteur.png)
