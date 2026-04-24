@@ -1,0 +1,1 @@
+password|secret|token|confidentiel|clé|pwd|pass|key|api_key

@@ -1,0 +1,6 @@
+.env
+config.json
+id_rsa
+wp-config.php
+credentials.xml
+.bash_history
