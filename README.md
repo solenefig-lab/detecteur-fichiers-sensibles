@@ -1,35 +1,38 @@
-# Détecteur Automatique de Fichiers Sensibles
+# Diagnostic d’Hygiène Numérique : Détecteur de Fichiers Sensibles
 ![Cybersecurity](https://img.shields.io/badge/Cybersecurity-GRC%20%7C%20RGPD-red)
-![Tool](https://img.shields.io/badge/Tool-Bash%20%7C%20Python-blue)
+![Tool](https://img.shields.io/badge/Tool-Bash-blue)
 ![Level](https://img.shields.io/badge/Level-Intermediate-orange)
-![Status](https://img.shields.io/badge/Status-Complete-green)
 
-> **Aperçu visuel de l'audit en cours :**
-![Capture d'écran du script en action](Screenshot_detecteur.png)
+> **Aperçu du rapport d'audit :**
+![Capture d'écran du script en action](screenshot_audit_fichiers_sensibles.png)
 
-## Contexte & Sécurité
+## 🛡️ Contexte & Objectifs GRC
 
-Script Bash conçu pour l'audit rapide de systèmes de fichiers afin d'identifier des données critiques exposées (mots de passe, tokens, secrets).
+Script Bash d'audit local conçu pour identifier l'exposition de données critiques (secrets, clés, fichiers de configuration) sur un poste de travail.
 
-**Objectif :** Réduire la surface d'attaque en appliquant les principes du **Privacy by Design** (RGPD Art. 25).
+**Alignement stratégique :**
+* **Gestion des Risques :** Identification des vecteurs de fuite de données (Data Leakage).
+* **Conformité :** Évaluation de l'application des principes de confidentialité (RGPD) et des directives de la PSSI.
+* **Audit :** Simulation de la phase de "Reconnaissance" lors d'un audit interne pour mesurer l'écart entre la politique de sécurité et la réalité du terrain.
 
-## Fonctionnalités
+## ⚙️ Fonctionnalités
 
-* Scan récursif de répertoires spécifiques.
-* Filtrage par types de fichiers sensibles (`.txt`, `.csv`, `.md`).
-* Détection par mots-clés (regex insensibles à la casse).
+* **Analyse de nomenclature :** Détection de fichiers critiques par dictionnaire (`.env`, `id_rsa`, `config.json`).
+* **Scan de contenu :** Recherche de patterns sensibles via regex (mots-clés GRC et techniques).
+* **Reporting quantitatif :** Calcul du volume de données analysées vs. nombre d'alertes pour faciliter le pilotage.
 
-## Installation et Utilisation
+## 🚀 Installation et Utilisation
 
-### 1. Récupérer le script
+### 1. Préparation de l'environnement
+Le script s'appuie sur deux dictionnaires externes pour une maintenance simplifiée. Assurez-vous que ces fichiers sont présents dans le répertoire du script :
+* [patterns.txt](./patterns.txt) : Liste des expressions régulières (mots-clés).
+* [fichiers_sensibles.txt](./fichiers_sensibles.txt) : Liste des noms de fichiers critiques.
 
-Vous pouvez télécharger directement le script ici : [Télécharger detecteur_sensible.sh](./detecteur_sensible.sh)
-
-### 2. Procédure
+### 2. Procédure d'exécution
 
 ```bash
-# 1. Donner les droits d'exécution
-chmod +x detecteur_sensible.sh
+# 1. Accorder les droits d'exécution
+chmod +x audit_hygiene.sh
 
-# 2. Lancer l'audit sur un dossier spécifique
-./detecteur_sensible.sh /chemin/vers/dossier
+# 2. Lancer l'audit sur le répertoire actuel (ou spécifier un chemin)
+./audit_hygiene.sh .
