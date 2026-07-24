@@ -1,0 +1,18 @@
+name: Bash
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  bash:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vérifier la syntaxe Bash
+        run: bash -n audit_hygiene.sh
