@@ -1,0 +1,6 @@
+"Chemin","Nom","Type","Description"
+"tests/sample-data/config.json","config.json","Nomenclature","Nom sensible : config.json"
+"tests/sample-data/config.json","config.json","Contenu","Pattern détecté : token"
+"tests/sample-data/.env",".env","Nomenclature","Nom sensible : .env"
+"tests/sample-data/.env",".env","Contenu","Pattern détecté : password"
+"tests/sample-data/dump.sql","dump.sql","Nomenclature","Nom sensible : dump.sql"

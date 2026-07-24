@@ -1,0 +1,31 @@
+==========================================
+ Rapport d'audit
+==========================================
+Date : Sat Jul 25 00:42:38 CEST 2026
+
+Répertoire analysé : tests/sample-data
+
+Nombre de fichiers : 6
+Alertes détectées  : 5
+
+---------- ALERTES ----------
+
+[Nomenclature]
+tests/sample-data/config.json
+Nom sensible : config.json
+
+[Contenu]
+tests/sample-data/config.json
+Pattern détecté : token
+
+[Nomenclature]
+tests/sample-data/.env
+Nom sensible : .env
+
+[Contenu]
+tests/sample-data/.env
+Pattern détecté : password
+
+[Nomenclature]
+tests/sample-data/dump.sql
+Nom sensible : dump.sql

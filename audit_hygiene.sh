@@ -1,55 +1,239 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Configuration
-TARGET_DIR=${1:-$HOME} # Analyse le Home par défaut
-PATTERNS=$(cat patterns.txt)
+set -o pipefail
+
+# ==========================================================
+# Audit d'hygiène numérique
+# Détecteur de fichiers sensibles
+# ==========================================================
+
+# Répertoire où se trouve ce script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+PATTERNS_FILE="$SCRIPT_DIR/patterns.txt"
+SENSITIVE_FILES_FILE="$SCRIPT_DIR/fichiers_sensibles.txt"
+
+OUTPUT_FORMAT="txt"
 REPORT_FILE="audit_report_$(date +%F).txt"
+TARGET_DIR="."
 
-echo "----------------------------------------------------"
-echo "   AUDIT DE PROTECTION DES DONNÉES - LOCALHOST      "
-echo "   Date : $(date)"
-echo "----------------------------------------------------"
+TOTAL_FILES=0
+declare -a ALERTS
 
-# 1. Collecte des métriques (Le volume)
-echo "[*] Calcul des volumes en cours..."
-nb_dossiers=$(find "$TARGET_DIR" -type d 2>/dev/null | wc -l)
-nb_fichiers=$(find "$TARGET_DIR" -type f 2>/dev/null | wc -l)
+# ----------------------------------------------------------
+# Vérifications
+# ----------------------------------------------------------
 
-# 2. Recherche par noms de fichiers (Exposition technique)
-# On utilise la liste créée à l'étape 1
-echo "[*] Recherche de fichiers critiques par nomenclature..."
-fichiers_nom=$(find "$TARGET_DIR" -type f \( -name ".env" -o -name "config.json" -o -name "id_rsa" -o -name "credentials.xml" \) 2>/dev/null)
-count_nom=$(echo "$fichiers_nom" | grep -v '^$' | wc -l)
+[[ -f "$PATTERNS_FILE" ]] || {
+    echo "Erreur : $PATTERNS_FILE introuvable."
+    exit 1
+}
 
-# 3. Recherche par contenu (Exposition GRC/RGPD)
-echo "[*] Analyse des contenus (Patterns sensibles)..."
-fichiers_contenu=$(grep -rEil "$PATTERNS" "$TARGET_DIR" \
-    --include="*.txt" --include="*.csv" --include="*.md" \
-    --include="*.env" --include="config.json" 2>/dev/null)
-count_contenu=$(echo "$fichiers_contenu" | grep -v '^$' | wc -l)
+[[ -f "$SENSITIVE_FILES_FILE" ]] || {
+    echo "Erreur : $SENSITIVE_FILES_FILE introuvable."
+    exit 1
+}
 
-# 4. Synthèse pour Revue de Direction (Positionnement GRC)
-echo -e "\n==============================================="
-echo "               SYNTHÈSE DE L'AUDIT             "
+# ----------------------------------------------------------
+# Arguments
+# ----------------------------------------------------------
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --csv)
+            OUTPUT_FORMAT="csv"
+            REPORT_FILE="audit_report_$(date +%F).csv"
+            shift
+            ;;
+
+        --output)
+            REPORT_FILE="$2"
+            shift 2
+            ;;
+
+        -*)
+            echo "Option inconnue : $1"
+            exit 1
+            ;;
+
+        *)
+            TARGET_DIR="$1"
+            shift
+            ;;
+    esac
+done
+
+[[ -d "$TARGET_DIR" ]] || {
+    echo "Erreur : répertoire introuvable : $TARGET_DIR"
+    exit 1
+}
+
+# ----------------------------------------------------------
+# Chargement des dictionnaires
+# ----------------------------------------------------------
+
+PATTERNS=()
+while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ -z "$line" ]] && continue
+    PATTERNS+=("$line")
+done < "$PATTERNS_FILE"
+
+SENSITIVE_FILES=()
+while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ -z "$line" ]] && continue
+    SENSITIVE_FILES+=("$line")
+done < "$SENSITIVE_FILES_FILE"
+
+# ----------------------------------------------------------
+# Fonction de scan
+# ----------------------------------------------------------
+
+scan_file() {
+
+    local file="$1"
+    local filename
+    filename=$(basename "$file")
+
+    local alert_type=""
+    local alert_content=""
+
+    # -------------------------
+    # Nomenclature
+    # -------------------------
+
+    for sensitive in "${SENSITIVE_FILES[@]}"; do
+
+        [[ -z "$sensitive" ]] && continue
+
+        if [[ "$filename" == "$sensitive" ]]; then
+
+            alert_type="Nomenclature"
+            alert_content="Nom sensible : $filename"
+
+            ALERTS+=("$file|$alert_type|$alert_content")
+            break
+
+        fi
+
+    done
+
+    # -------------------------
+    # Vérifie que le fichier est texte
+    # -------------------------
+
+    if file -b --mime-encoding "$file" | grep -Eq 'utf-8|us-ascii|ascii'; then
+
+        for pattern in "${PATTERNS[@]}"; do
+
+            [[ -z "$pattern" ]] && continue
+
+            if grep -Eiq "$pattern" "$file"; then
+
+                alert_type="Contenu"
+                alert_content="Pattern détecté : $pattern"
+
+                ALERTS+=("$file|$alert_type|$alert_content")
+
+                return
+
+            fi
+
+        done
+
+    fi
+
+}
+
+# ----------------------------------------------------------
+# Scan
+# ----------------------------------------------------------
+
+echo
 echo "==============================================="
-echo "Périmètre analysé    : $TARGET_DIR"
-echo "Nombre de dossiers   : $nb_dossiers"
-echo "Nombre de fichiers   : $nb_fichiers"
-echo "-----------------------------------------------"
-echo "ALERTE : Fichiers critiques trouvés (nom) : $count_nom"
-echo "ALERTE : Fichiers suspects (contenu)      : $count_contenu"
+echo " Audit d'hygiène numérique"
 echo "==============================================="
+echo "Répertoire : $TARGET_DIR"
+echo
 
-# 5. Liste détaillée pour revue et modification
-echo -e "\n[DÉTAILS POUR PLAN D'ACTION]"
-if [ $count_nom -gt 0 ]; then
-    echo -e "\n--- Fichiers de config/secrets identifiés ---"
-    echo "$fichiers_nom"
+while IFS= read -r file; do
+
+    ((TOTAL_FILES++))
+
+    scan_file "$file"
+
+done < <(find "$TARGET_DIR" -type f 2>/dev/null)
+
+# ----------------------------------------------------------
+# Génération TXT
+# ----------------------------------------------------------
+
+if [[ "$OUTPUT_FORMAT" == "txt" ]]; then
+
+    {
+
+        echo "=========================================="
+        echo " Rapport d'audit"
+        echo "=========================================="
+        echo "Date : $(date)"
+        echo
+        echo "Répertoire analysé : $TARGET_DIR"
+        echo
+        echo "Nombre de fichiers : $TOTAL_FILES"
+        echo "Alertes détectées  : ${#ALERTS[@]}"
+        echo
+
+        if [[ ${#ALERTS[@]} -gt 0 ]]; then
+
+            echo "---------- ALERTES ----------"
+
+            for alert in "${ALERTS[@]}"; do
+                IFS="|" read -r path type content <<< "$alert"
+
+                echo
+                echo "[$type]"
+                echo "$path"
+                echo "$content"
+
+            done
+
+        else
+
+            echo "Aucune alerte."
+
+        fi
+
+    } > "$REPORT_FILE"
+
 fi
 
-if [ $count_contenu -gt 0 ]; then
-    echo -e "\n--- Documents contenant des mots-clés sensibles ---"
-    echo "$fichiers_contenu"
+# ----------------------------------------------------------
+# Génération CSV
+# ----------------------------------------------------------
+
+if [[ "$OUTPUT_FORMAT" == "csv" ]]; then
+
+    echo '"Chemin","Nom","Type","Description"' > "$REPORT_FILE"
+
+    for alert in "${ALERTS[@]}"; do
+
+        IFS="|" read -r path type content <<< "$alert"
+
+        content=${content//\"/\"\"}
+
+        echo "\"$path\",\"$(basename "$path")\",\"$type\",\"$content\"" \
+            >> "$REPORT_FILE"
+
+    done
+
 fi
 
-echo -e "\nFin de l'audit."
+# ----------------------------------------------------------
+# Résumé console
+# ----------------------------------------------------------
+
+echo
+echo "-------------------------------------------"
+echo "Fichiers analysés : $TOTAL_FILES"
+echo "Alertes détectées : ${#ALERTS[@]}"
+echo "Rapport généré    : $REPORT_FILE"
+echo "-------------------------------------------"

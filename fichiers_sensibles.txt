@@ -4,3 +4,4 @@ id_rsa
 wp-config.php
 credentials.xml
 .bash_history
+dump.sql

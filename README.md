@@ -5,7 +5,7 @@
 ![Language: Bash](https://img.shields.io/badge/Language-Bash-informational.svg)
 
 > Outil de reconnaissance locale pour l'audit de postes de travail
-> Aligné ANSSI · RGPD Art. 5 & 32 · EBIOS RM · ISO 27001 A.8
+> Approche inspirée par ANSSI · RGPD Art. 5 & 32 · EBIOS RM · ISO 27001 A.8
 
 ---
 
@@ -16,13 +16,13 @@ Ce script Bash constitue un **outil de diagnostic de première intention**, con�
 Il s'inscrit dans trois démarches GRC complémentaires :
 
 **Gestion des risques**
-Identification des vecteurs d'exfiltration de données au niveau poste, conformément au cadre EBIOS RM (caractérisation des sources de menace et des biens supports). Les alertes produites alimentent une évaluation qualitative du niveau d'exposition et peuvent être intégrées à un registre des risques existant.
+Identification des vecteurs d'exposition liés au stockage local de données sensibles, pouvant alimenter une analyse de risque selon une démarche EBIOS RM (biens supports, sources de menace et scénarios opérationnels). Les alertes produites alimentent une évaluation qualitative du niveau d'exposition et peuvent être intégrées à un registre des risques existant.
 
 **Conformité**
 Évaluation de l'application du principe de minimisation (RGPD, Art. 5) et des mesures techniques de protection des données (RGPD, Art. 32). Alignement avec les recommandations de durcissement des postes de travail publiées par l'ANSSI (*Guide de configuration d'un poste de travail sécurisé*) et les contrôles de l'ISO 27001 en matière de gestion des actifs (A.8).
 
 **Audit interne & sensibilisation**
-Simulation de la phase de découverte locale (MITRE ATT&CK TA0007 — Discovery) lors d'un audit interne, pour mesurer l'écart entre la politique de sécurité formalisée (PSSI) et les pratiques réelles sur le terrain. Utilisable en atelier de sensibilisation pour rendre concrets les risques liés aux habitudes de stockage.
+Illustration d'une activité de découverte locale pouvant être rapprochée de la tactique MITRE ATT&CK Discovery (TA0007), lors d'un audit interne, pour mesurer l'écart entre la politique de sécurité formalisée (PSSI) et les pratiques réelles sur le terrain. Utilisable en atelier de sensibilisation pour rendre concrets les risques liés aux habitudes de stockage.
 
 ---
 
@@ -41,14 +41,19 @@ Recherche de patterns sensibles par expressions régulières sur le contenu des 
 Production d'indicateurs quantitatifs à l'issue du scan :
 
 - volume de fichiers analysés,
-- nombre d'alertes par catégorie (nomenclature / contenu),
+- nombre total d'alertes, catégories associées et chemins concernés,  
 - chemins complets des fichiers concernés.
 
 Ces métriques constituent une base pour un tableau de bord d'hygiène numérique, un reporting RSSI ou un relevé de constatations lors d'un audit.
 
 
 > **Aperçu du rapport d'audit :**
-![Capture d'écran du script en action](screenshot_audit_fichiers_sensibles.png)
+![Capture d'écran du script en action](./tests/demo-results/screenshots/screenshot_audit.png)
+
+![Capture d'écran du rapport format csv](./tests/demo-results/screenshots/screenshot_audit-report-csv.png)
+
+Pour le guide de déploiement détaillé, y compris fonctionnalités avancées : [Guide de déploiement](./DEPLOYMENT.md)
+
 ---
 
 ## ⚠️ Limites & Précautions d'usage
@@ -59,7 +64,7 @@ La crédibilité d'un outil d'audit repose autant sur ce qu'il **ne fait pas** q
 - **Faux positifs** : la détection par regex sur le contenu ne dispose d'aucun contexte sémantique. Une revue manuelle des alertes est indispensable avant toute conclusion ou remontée dans un rapport.
 - **Fichiers non textuels** : les fichiers binaires (images, archives chiffrées, bases SQLite, fichiers Office) ne sont pas analysés en contenu. Seule la nomenclature est contrôlée pour ces types.
 - **Droits d'accès** : le script s'exécute avec les droits de l'utilisateur courant. Les fichiers protégés en lecture sont silencieusement ignorés — cette limite doit être signalée si le scan est réalisé sans élévation de privilèges.
-- **Non-substitution à un outil certifié** : cet outil est un support de diagnostic, de sensibilisation et d'audit interne. Il ne se substitue pas à un scanner de conformité certifié (DLP, CASB) ni à une analyse forensique.
+- **Non-substitution à un outil certifié** : cet outil est un support de diagnostic, de sensibilisation et d'audit interne. Il ne se substitue pas à solution spécialisée de prévention de fuite de données (DLP), de contrôle d'accès cloud (CASB) ou outil d'audit industriel.
 
 ---
 
@@ -67,7 +72,7 @@ La crédibilité d'un outil d'audit repose autant sur ce qu'il **ne fait pas** q
 
 ### Prérequis
 
-- Bash ≥ 4.0
+- Bash compatible 3.2+ (testé sur macOS/Linux)
 - `grep` avec support des expressions régulières étendues POSIX (`-E`)
 - Droits de lecture sur le répertoire cible
 
@@ -175,8 +180,16 @@ Merci de respecter une posture responsable :
 - ne pas proposer de fonctionnalités visant à exfiltrer des données ou contourner des contrôles en production ;
 - privilégier une utilisation en environnement de test, d’audit interne ou de sensibilisation.
 
+Pour plus d'infos : voir [Contributing](./CONTRIBUTING.md)
+
 ---
 
+## 🔒 Sécurité
+
+Toute vulnérabilité ou comportement inattendu doit être signalé via notre [Politique de sécurité](./SECURITY.md).
+Merci de ne **pas ouvrir d’issue publique** pour les problèmes sensibles.
+
+---
 ## ⚖️ Licence
 
 Le code de ce dépôt (`audit_hygiene.sh` et scripts associés) est distribué sous licence **MIT**.

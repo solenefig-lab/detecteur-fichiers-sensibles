@@ -1,1 +1,16 @@
-password|secret|token|confidentiel|clé|pwd|pass|key|api_key
+password
+secret
+token
+confidentiel
+clé
+pwd
+pass
+key
+api_key
+private_key
+access_token
+secret_key
+authorization
+bearer
+jwt
+-----BEGIN PRIVATE KEY-----
