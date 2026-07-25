@@ -1,4 +1,6 @@
-# Diagnostic d'Hygiène Numérique — Détecteur de Fichiers Sensibles
+
+# Diagnostic d'Hygiène Numérique - Détecteur de Fichiers Sensibles
+
 > [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 ![Type: Audit Script](https://img.shields.io/badge/Type-Audit%20Script-informational.svg)
 ![Focus: Data Leakage & GRC](https://img.shields.io/badge/Focus-Data%20Leakage%20%26%20GRC-informational.svg)
@@ -63,8 +65,9 @@ La crédibilité d'un outil d'audit repose autant sur ce qu'il **ne fait pas** q
 - **Périmètre de scan** : parcours récursif à partir du répertoire cible uniquement. Les chemins montés, partages réseau (NFS, SMB), volumes chiffrés et conteneurs ne sont pas couverts sauf inclusion explicite dans le chemin passé en argument.
 - **Faux positifs** : la détection par regex sur le contenu ne dispose d'aucun contexte sémantique. Une revue manuelle des alertes est indispensable avant toute conclusion ou remontée dans un rapport.
 - **Fichiers non textuels** : les fichiers binaires (images, archives chiffrées, bases SQLite, fichiers Office) ne sont pas analysés en contenu. Seule la nomenclature est contrôlée pour ces types.
-- **Droits d'accès** : le script s'exécute avec les droits de l'utilisateur courant. Les fichiers protégés en lecture sont silencieusement ignorés — cette limite doit être signalée si le scan est réalisé sans élévation de privilèges.
+- **Droits d'accès** : le script s'exécute avec les droits de l'utilisateur courant. Les fichiers protégés en lecture sont silencieusement ignorés - cette limite doit être signalée si le scan est réalisé sans élévation de privilèges.
 - **Non-substitution à un outil certifié** : cet outil est un support de diagnostic, de sensibilisation et d'audit interne. Il ne se substitue pas à solution spécialisée de prévention de fuite de données (DLP), de contrôle d'accès cloud (CASB) ou outil d'audit industriel.
+- **Sécurité des rapports générés** : les rapports produits (sortie standard, export CSV) peuvent contenir des chemins complets de fichiers et des noms de ressources sensibles. Ils constituent eux-mêmes des données à protéger - ils ne doivent pas être stockés dans un répertoire partagé, transmis sur un canal non chiffré, ou conservés au-delà de la durée nécessaire à l'audit.
 
 ---
 
@@ -80,8 +83,8 @@ La crédibilité d'un outil d'audit repose autant sur ce qu'il **ne fait pas** q
 
 Deux dictionnaires externes sont nécessaires. Placez-les dans le même répertoire que le script :
 
-- [`patterns.txt`](./patterns.txt) — Expressions régulières pour le scan de contenu (mots-clés techniques et GRC).
-- [`fichiers_sensibles.txt`](./fichiers_sensibles.txt) — Noms de fichiers considérés comme critiques.
+- [`patterns.txt`](./patterns.txt) - Expressions régulières pour le scan de contenu (mots-clés techniques et GRC).
+- [`fichiers_sensibles.txt`](./fichiers_sensibles.txt) - Noms de fichiers considérés comme critiques.
 
 Ces fichiers sont fournis à titre d'exemple et doivent être adaptés au contexte de votre organisation (secteur, référentiel de classification, environnement technique).
 

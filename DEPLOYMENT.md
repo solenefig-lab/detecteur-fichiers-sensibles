@@ -117,6 +117,7 @@ ___
 Exécutez le script avec un utilisateur standard (pas besoin de root).
 Ne scannez pas de partages réseau (NFS, SMB) sans autorisation.
 Adaptez les dictionnaires régulièrement (nouveaux projets, nouveaux outils).
+Après chaque scan, vérifiez le lieu de stockage du rapport et appliquez les contrôles d'accès appropriés (à minima : droits en lecture restreints à l'auditeur, suppression après exploitation, transmission chiffrée si partage requis).
 Intégrez le scan dans vos processus :
 
 - Avant un audit interne.  
@@ -126,12 +127,12 @@ Intégrez le scan dans vos processus :
 ---
 
 ## FAQ
-Q : Le script ralentit-il mon poste ?
-R : L'impact dépend du volume de fichiers analysés et du support de stockage. Le script utilise des commandes système standards (find, grep, file).
-Q : Puis-je l’utiliser sur un serveur ?
-R : Oui, mais vérifiez que les droits d’accès sont suffisants pour scanner les répertoires cibles.
-Q : Comment éviter les faux positifs ?
-R : Affinez les dictionnaires (patterns.txt, fichiers_sensibles.txt) pour exclure les fichiers légitimes.
+Q : Le script ralentit-il mon poste ?  
+R : L'impact dépend du volume de fichiers analysés et du support de stockage. Le script utilise des commandes système standards (find, grep, file).  
+Q : Puis-je l’utiliser sur un serveur ?  
+R : Oui, mais vérifiez que les droits d’accès sont suffisants pour scanner les répertoires cibles.  
+Q : Comment éviter les faux positifs ?  
+R : Affinez les dictionnaires (patterns.txt, fichiers_sensibles.txt) pour exclure les fichiers légitimes.  
 
 ---
 
